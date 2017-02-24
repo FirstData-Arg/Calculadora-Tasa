@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Calculadora de Tasas</title>
+    <title>Simulador de Tasas</title>
     <link href="bootstrap.min.css" rel="stylesheet">
     <link href="calculadora.css" rel="stylesheet">
 </head>
@@ -14,7 +14,7 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-9">
-            <h1 class="page-header">Calculadora de Tasas</h1>
+            <h1 class="page-header">Simulador de Tasas</h1>
         </div>
         <div class="col-sm-3">
             <a href="http://www.firstdata.com.ar"><img src="logo.png" class="img-responsive pull-right" alt="Responsive image"></a>
@@ -37,16 +37,10 @@
                                     <span class="help-block">Ingrese el precio de contado del producto</span>
                                 </div>
                                 <div class="form-group">
-                                    <label>I.V.A.</label>
-                                    <div class="form-group input-group">
-                                        <input id="iva" type="text" class="form-control" />
-                                        <span class="input-group-addon">%</span>
-                                    </div>
-                                    <span class="help-block">Ingrese la alícuota de I.V.A. del producto</span>
-                                </div>
-                                <div class="form-group">
                                     <label>Cantidad de Cuotas</label>
                                     <select class="form-control" id="cuotas">
+                                          <option>Ahora 12</option>
+                                          <option>Ahora 18</option>
                                           <option>2</option>
                                           <option>3</option>
                                           <option>4</option>
@@ -70,13 +64,39 @@
                                           <option>22</option>
                                           <option>23</option>
                                           <option>24</option>
+                                          <option>25</option>
+                                          <option>26</option>
+                                          <option>27</option>
+                                          <option>28</option>
+                                          <option>29</option>
+                                          <option>30</option>
+                                          <option>31</option>
+                                          <option>32</option>
+                                          <option>33</option>
+                                          <option>34</option>
+                                          <option>35</option>
+                                          <option>36</option>
+                                          <option>37</option>
+                                          <option>38</option>
+                                          <option>39</option>
+                                          <option>40</option>
+                                          <option>41</option>
+                                          <option>42</option>
+                                          <option>43</option>
+                                          <option>44</option>
+                                          <option>45</option>
+                                          <option>46</option>
+                                          <option>47</option>
+                                          <option>48</option>
+                                          <option>49</option>
+                                          <option>50</option>
                                     </select>
                                     <span class="help-block">Ingrese la cantidad de coutas a pagar el producto</span>
                                 </div>
                                 <div class="form-group">
                                     <label>T.N.A.</label>
                                     <div class="form-group input-group">
-                                        <input id="tna" type="text" class="form-control" />
+                                        <input id="tna" type="text" class="form-control" readonly="readonly" />
                                         <span class="input-group-addon">%</span>
                                     </div>
                                     <span class="help-block">Ingrese la T.N.A. (Tasa Nominal Anual) de acuerdo a la cantidad de cuotas y la entidad bancaria</span>
@@ -103,7 +123,7 @@
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <p>
-                                    <span class="lead">Valor Total en Cuotas: </span><span id="valor_total" class="lead"></span>
+                                    <span class="lead">Precio de Venta en Cuotas: </span><span id="valor_total" class="lead"></span>
                                 </p>
                             </div>
                             <div class="form-group">
@@ -122,23 +142,22 @@
                             </div>
                             <div class="form-group">
                                 <p>
-                                    <span class="lead">T.E.M.: </span><span id="tem" class="lead"></span>
-                                    <span class="help-block small">Tasa Efectiva Mensual</span>
+                                    <span class="lead">C.F.T.: </span><span id="cft" class="lead"></span>
+                                    <span class="help-block small">Costo Financiero Total</span>
                                 </p>
                             </div>
                             <div class="form-group">
                                 <p>
-                                    <span class="lead">C.F.T.: </span><span id="cft" class="lead"></span>
-                                    <span class="help-block small">Costo Financiero Total</span>
+                                    <span class="lead">Coeficiente: </span><span id="coeficiente" class="lead"></span>
+                                    <span class="help-block small">Factor Financiero con IVA</span>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>        
         </div>
     </div>
-    
     
     <div class="row">
         <div class="col-sm-12">
@@ -155,59 +174,224 @@
 
 <script>
 
-var tna_array = [[0,0],[1,0],[2,42],[3,42],[4,42],[5,42],[6,42],[7,45],[8,45],[9,45],[10,45],[11,45],[12,45],[13,46],[14,46],[15,46],[16,46],[17,46],[18,46],[19,46],[20,46],[21,46],[22,46],[23,46],[24,46]];
+function TIR_Calc(CArray) {
+    //IRRCalc
+    min = -1.0;
+    max = 1.0;
+    do {
+        guest = (min + max) / 2;
+        NPV = 0;
+        for (var j=0; j<CArray.length; j++) {
+            NPV += CArray[j]/Math.pow((1+guest),j);
+        }
+        if (NPV > 0) {
+            min = guest;
+        }
+        else {
+            max = guest;
+        }
+    } while(Math.abs(NPV) > 0.000001);
+    return guest;
+}
+
+
+function XNPV(rate, values) {
+    var xnpv = 0.0;
+    for (var key in values) {
+        var tmp = values[key];
+        var value = tmp.Flow;
+        var date = tmp.Date;
+        xnpv += value / Math.pow(1 + rate, date / 365);
+    };
+    return xnpv;
+};
+
+function XIRR(values, guess) {
+    if (!guess) guess = 0.1;
+    
+    var x1 = 0.0;
+    var x2 = guess;
+    var f1 = XNPV(x1, values);
+    var f2 = XNPV(x2, values);
+    
+    for (var i = 0; i < 100; i++) {
+        if ((f1 * f2) < 0.0) break;
+        if (Math.abs(f1) < Math.abs(f2)) {
+            f1 = XNPV(x1 += 1.6 * (x1 - x2), values);
+        }
+        else {
+            f2 = XNPV(x2 += 1.6 * (x2 - x1), values);
+        }
+    };
+    
+    if ((f1 * f2) > 0.0) return null;
+    
+    var f = XNPV(x1, values);
+    if (f < 0.0) {
+        var rtb = x1;
+        var dx = x2 - x1;
+    }
+    else {
+        var rtb = x2;
+        var dx = x1 - x2;
+    };
+    
+    for (var i = 0; i < 100; i++) {
+        dx *= 0.5;
+        var x_mid = rtb + dx;
+        var f_mid = XNPV(x_mid, values);
+        if (f_mid <= 0.0) rtb = x_mid;
+        if ((Math.abs(f_mid) < 1.0e-6) || (Math.abs(dx) < 1.0e-6)) return x_mid;
+    };
+    
+    return null;
+};
+    
+
+var tabla_json = {"Ahora 12": {"cuotas": 12, "tna": "Descuento Directo 10%", "directo": true, "tea": 0.2217, "cft": 0.2789, "coeficiente": 1.1377},
+                  "Ahora 18": {"cuotas": 18, "tna": "Descuento Directo 15%", "directo": true, "tea": 0.2379, "cft": 0.3030, "coeficiente": 1.2217},
+                         "2": {"cuotas": 2,  "tna": 42},
+                         "3": {"cuotas": 3,  "tna": 42},
+                         "4": {"cuotas": 4,  "tna": 42},
+                         "5": {"cuotas": 5,  "tna": 42},
+                         "6": {"cuotas": 6,  "tna": 42},
+                         "7": {"cuotas": 7,  "tna": 45},
+                         "8": {"cuotas": 8,  "tna": 45},
+                         "9": {"cuotas": 9,  "tna": 45},
+                        "10": {"cuotas": 10, "tna": 45},
+                        "11": {"cuotas": 11, "tna": 45},
+                        "12": {"cuotas": 12, "tna": 45},
+                        "13": {"cuotas": 13, "tna": 46},
+                        "14": {"cuotas": 14, "tna": 46},
+                        "15": {"cuotas": 15, "tna": 46},
+                        "16": {"cuotas": 16, "tna": 46},
+                        "17": {"cuotas": 17, "tna": 46},
+                        "18": {"cuotas": 18, "tna": 46},
+                        "19": {"cuotas": 19, "tna": 46},
+                        "20": {"cuotas": 20, "tna": 46},
+                        "21": {"cuotas": 21, "tna": 46},
+                        "22": {"cuotas": 22, "tna": 46},
+                        "23": {"cuotas": 23, "tna": 46},
+                        "24": {"cuotas": 24, "tna": 46},
+                        "25": {"cuotas": 25, "tna": 47},
+                        "26": {"cuotas": 26, "tna": 47},
+                        "27": {"cuotas": 27, "tna": 47},
+                        "28": {"cuotas": 28, "tna": 47},
+                        "29": {"cuotas": 29, "tna": 47},
+                        "30": {"cuotas": 30, "tna": 47},
+                        "31": {"cuotas": 31, "tna": 47},
+                        "32": {"cuotas": 32, "tna": 47},
+                        "33": {"cuotas": 33, "tna": 47},
+                        "34": {"cuotas": 34, "tna": 47},
+                        "35": {"cuotas": 35, "tna": 47},
+                        "36": {"cuotas": 36, "tna": 47},
+                        "37": {"cuotas": 37, "tna": 47},
+                        "38": {"cuotas": 38, "tna": 47},
+                        "39": {"cuotas": 39, "tna": 47},
+                        "40": {"cuotas": 40, "tna": 47},
+                        "41": {"cuotas": 41, "tna": 47},
+                        "42": {"cuotas": 42, "tna": 47},
+                        "43": {"cuotas": 43, "tna": 47},
+                        "44": {"cuotas": 44, "tna": 47},
+                        "45": {"cuotas": 45, "tna": 47},
+                        "46": {"cuotas": 46, "tna": 47},
+                        "47": {"cuotas": 47, "tna": 47},
+                        "48": {"cuotas": 48, "tna": 47},
+                        "49": {"cuotas": 49, "tna": 47},
+                        "50": {"cuotas": 50, "tna": 47}};
+//var tna_array = [["Ahora12",0],["Ahora18",0],[2,42],[3,42],[4,42],[5,42],[6,42],[7,45],[8,45],[9,45],[10,45],[11,45],[12,45],[13,46],[14,46],[15,46],[16,46],[17,46],[18,46],[19,46],[20,46],[21,46],[22,46],[23,46],[24,46],[36,19],[50,19]];
 
 function calcular() {
-    var cuotas = $("#cuotas").val().replace(",", ".");
-    var tna = $("#tna").val().replace(",", ".") / 100;
-    var iva = $("#iva").val().replace(",", ".") / 100;
+    var cuotas = tabla_json[$("#cuotas").val()]["cuotas"];
+    if ($("#precio").val() == "") $("#precio").val("100");
     var precio = $("#precio").val().replace(",", ".");
-
-    //var tea = (((1 + (tna / cuotas)) ** cuotas) - 1) * 100;
-    var tea = (Math.pow((1 + (tna / cuotas)), cuotas) - 1) * 100;
-    var tem = tna * 100 * 30 / 360;
-    //var cft = ((((1 + (tna / cuotas)) ** cuotas) - 1) * (1 + iva)) * 100;
-    var cft = ((Math.pow((1 + (tna / cuotas)), cuotas) - 1) * (1 + iva)) * 100;
     
-    var arancel = 0.03;
-    var dias_primer = 28;
-    var dias_resto = 30;
-    
-    var precio_cuota = precio * (1-arancel) / cuotas;
-    var cuotas_comercio = 0;
-    for (c = 0; c < cuotas; c++) {
-        cuotas_comercio = cuotas_comercio + (precio_cuota / ((1+(dias_primer*tna/360)) * Math.pow((1+(dias_resto*tna/360)), c)));
-    }
-    var coeficiente = precio * (1-arancel) / cuotas_comercio;    
-    var valor_total = precio * coeficiente;
-    var valor_cuota = precio * coeficiente / cuotas;
+    if (tabla_json[$("#cuotas").val()]["directo"]) {
+        // Planes especiales del gobierno, tasa directa
+        var tea = tabla_json[$("#cuotas").val()]["tea"];
+        var cft = tabla_json[$("#cuotas").val()]["cft"];
+        var coeficiente_con_iva = tabla_json[$("#cuotas").val()]["coeficiente"];
+    } else {
+        // Resto de los planes, se calculan
+       
+        // Input
+        var tna = $("#tna").val().replace(",", ".") / 100;
+        var tea = (Math.pow((1 + (tna / cuotas)), cuotas) - 1) ;
         
-    $("#tea").text(tea.toFixed(2) + "%");
-    $("#tem").text(tem.toFixed(2) + "%");
-    $("#cft").text(cft.toFixed(2) + "%");
+        // Constantes
+        var iva = 0.21;
+        var arancel = 0.03;
+        var dias_ano = 360;
+        var dias_mes = 30;
+        var dias_adelanto = 2;
+        var dias_primer = dias_mes - dias_adelanto;
+        
+        // Calculos
+        var pago_comercio = 0;
+        // Calculo el acumulado de los pagos presenciales al comercio
+        var cuota_sin_arancel = precio * (1-arancel) / cuotas;
+        for (c = 0; c < cuotas; c++) {
+            pago_comercio = pago_comercio + (cuota_sin_arancel / ((1+((dias_primer/dias_ano)*tna)) * Math.pow((1+((dias_mes/dias_ano)*tna)), c)));
+        }
+        var coeficiente_sin_iva = precio * (1-arancel) / pago_comercio;
+        var tasa_directa = (1-arancel) - ((1-arancel) / coeficiente_sin_iva);
+        var coeficiente_con_iva = (100 / (1-(tasa_directa * (1+iva)))) / 100;
+        var precio_total_financiado = precio * coeficiente_con_iva;
+        var descuento_financ_otorgante = precio_total_financiado * tasa_directa;
+        var cuota_con_iva = (precio * coeficiente_con_iva) / cuotas;
+        var cuota_financiada = precio_total_financiado / cuotas;
+
+        // CFT
+        var cft_array = [];
+        cft_array.push({Date: 0, Flow: (-1 * precio)});
+        for (c = 1; c <= cuotas; c++) {
+            var d = (c == 1 ? dias_primer : dias_mes * c);
+            cft_array.push({Date: d, Flow: cuota_con_iva});
+        }
+        var cft = XIRR(cft_array);
+        
+        // TEA
+        var tea_array = [];
+        tea_array.push({Date: 0, Flow: (-1 * (precio_total_financiado - descuento_financ_otorgante))});
+        for (c = 1; c <= cuotas; c++) {
+            var d = (c == 1 ? dias_primer : dias_mes * c);
+            tea_array.push({Date: d, Flow: cuota_financiada});
+        }
+        var tea = XIRR(tea_array);
+    }
+    
+    var coeficiente = coeficiente_con_iva;
+    var valor_total = precio * coeficiente;
+    var valor_cuota = (precio * coeficiente) / cuotas;
+        
+    $("#tea").text((tea * 100).toFixed(2) + "%");
+    $("#cft").text((cft * 100).toFixed(2) + "%");
     $("#valor_total").text("$" + valor_total.toFixed(2));
     $("#valor_cuota").text("$" + valor_cuota.toFixed(2));
+    $("#coeficiente").text(coeficiente.toFixed(4));
 }
 
 $(document).ready(function() {
+    $("#cuotas").val("Ahora 12");
+    $("#tna").val(tabla_json[$("#cuotas").val()]["tna"]);
+    
     $("#calcular").on("click", function() {
-        calcular()
+        calcular();
     }),
     $("#limpiar").on("click", function() {
         $("#tea").text("");
-        $("#tem").text("");
         $("#cft").text("");
         $("#valor_total").text("");
         $("#valor_cuota").text("");
-        $("#cuotas").val("1");
-        $("#tna").val("");
-        $("#iva").val("");
+        $("#cuotas").val("Ahora 12");
+        $("#tna").val(tabla_json[$("#cuotas").val()]["tna"]);
         $("#precio").val("");
     }),
     $("#cuotas").on("change", function() {
-        //if ($("#tna").val() == "") {
-            $("#tna").val(tna_array[$("#cuotas").val()][1]);
-        //}
+        //$("#tna").val(tna_array[$("#cuotas").val()][1]);
+        $("#tna").val(tabla_json[$("#cuotas").val()]["tna"]);
+        if (tabla_json[$("#cuotas").val()]["directo"]) $("#tna").prop('readonly', true);
+        else $("#tna").prop('readonly', false);
     })
 });
 </script>
