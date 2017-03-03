@@ -4,29 +4,32 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <title>Simulador de Financiación en Cuotas</title>
+    
     <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome.min.css" rel="stylesheet">
     <link href="calculadora.css" rel="stylesheet">
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="printSection">
     <div class="row">
-        <div class="col-sm-9">
+        <div class="col-xs-9">
             <h1 class="page-header">Simulador de Financiación en Cuotas</h1>
         </div>
-        <div class="col-sm-3">
+        <div class="col-xs-3">
             <a href="http://www.firstdata.com.ar"><img src="logo.png" class="img-responsive pull-right" alt="Responsive image"></a>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-xs-6">
             <div class="panel panel-primary">
                 <div class="panel-heading">Datos</div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-sm-12">
+                        <div class="col-xs-12">
                             <form role="form">
                                 <div class="form-group">
                                     <label>Precio de Contado</label>
@@ -102,11 +105,13 @@
                                     <span class="help-block">Ingrese la T.N.A. (Tasa Nominal Anual) de acuerdo a la cantidad de cuotas y la entidad bancaria</span>
                                 </div>
                                 <div class="form-inline">
-                                    <div class="form-group" align="left">
-                                        <button id="limpiar" type="button" class="btn btn-warning">Limpiar</button>
-                                    </div>
-                                    <div class="form-group pull-right" align="right">
-                                        <button id="calcular" type="button" class="btn btn-primary">Calcular</button>
+                                    <div class="row">
+                                        <div class="form-group col-xs-6" align="left">
+                                            <button id="limpiar" type="button" class="btn btn-warning"><i class="fabutton fa fa-trash"></i> Limpiar</button>
+                                        </div>
+                                        <div class="form-group col-xs-6" align="right">
+                                            <button id="calcular" type="button" class="btn btn-primary"><i class="fabutton fa fa-calculator"></i> Calcular</button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -115,12 +120,22 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
+        <div class="col-xs-6">
             <div class="panel panel-primary">
                 <div class="panel-heading">Resultado</div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-sm-12">
+                        <div class="col-xs-12">
+                            <div class="form-group">
+                                <p>
+                                    <span class="lead">Precio de Contado: </span><span id="valor_contado" class="lead"></span>
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <p>
+                                    <span class="lead">Cantidad de Cuotas: </span><span id="cant_cuotas" class="lead"></span>
+                                </p>
+                            </div>
                             <div class="form-group">
                                 <p>
                                     <span class="lead">Precio de Venta en Cuotas: </span><span id="valor_total" class="lead"></span>
@@ -152,6 +167,13 @@
                                     <span class="help-block small">Factor de Venta Financiada con IVA</span>
                                 </p>
                             </div>
+                            <div class="form-inline">
+                                <div class="row">
+                                    <div class="form-group col-xs-12" align="center">
+                                        <button id="imprimir" type="button" class="btn btn-info"><i class="fabutton fa fa-print"></i> Imprimir</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -160,10 +182,10 @@
     </div>
     
     <div class="row">
-        <div class="col-sm-12">
+        <div class="col-xs-12">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <span class="help-block small">Simulador elaborado en base a consulta formulada ante la Secretaría de Comercio de la Nación, en su carácter de autoridad de aplicación de la ley 25.065, contempla las premisas aplicables a la generalidad de los casos. El mismo tiene una finalidad meramente orientativa; se recomienda a los establecimientos validar con un especialista la aplicabilidad a su caso concreto. Para el cálculo del CFT no se contemplan los siguientes conceptos: (1) Impuestos, con excepción del IVA; (2) Otros recargos adicionales aplicados por el establecimiento, más allá del que surja de la aplicación del coeficiente correspondiente a la cantidad de cuotas respectiva; (3) Aranceles, comisiones y/o cargos a pagar por el establecimiento (art. 15, ley 25.065); (4) Comisiones, cargos u otros conceptos que pueda cobrar el emisor de la tarjeta.</span>
+                    <span class="help-block small">Simulador elaborado en base a consulta formulada ante la Secretaría de Comercio de la Nación, en su carácter de autoridad de aplicación de la Ley 25.065. El mismo tiene una finalidad meramente orientativa. Para el cálculo del CFT contempla los conceptos aplicables a la generalidad de los casos: intereses e IVA de los intereses. Sin embargo, debe tenerse en cuenta que son computables las comisiones y otros cargos que se relacionen con la financiación de la venta y/o con el costo del medio de pago utilizado, que de aplicarse deberán incluirse en el cálculo del CFT; y no son computables el arancel del Artículo 15 de la Ley N° 25.065, retenciones o percepciones tributarias.</span>
                 </div>
             </div>
         </div>
@@ -304,7 +326,7 @@ var tabla_json = {"Ahora 12": {"cuotas": 12, "tna": "Descuento Directo 10%", "di
 function calcular() {
     var cuotas = tabla_json[$("#cuotas").val()]["cuotas"];
     if ($("#precio").val() == "") $("#precio").val("100");
-    var precio = $("#precio").val().replace(",", ".");
+    var precio = $("#precio").val().replace(",", ".") * 1.00;
     
     if (tabla_json[$("#cuotas").val()]["directo"]) {
         // Planes especiales del gobierno, tasa directa
@@ -366,10 +388,41 @@ function calcular() {
         
     $("#tea").text((tea * 100).toFixed(2) + "%");
     $("#cft").text((cft * 100).toFixed(2) + "%");
+    $("#valor_contado").text("$" + precio.toFixed(2));
+    $("#cant_cuotas").text($("#cuotas").val());
     $("#valor_total").text("$" + valor_total.toFixed(2));
     $("#valor_cuota").text("$" + valor_cuota.toFixed(2));
     $("#coeficiente").text(coeficiente.toFixed(4));
 }
+
+/*
+function printElement(elem, append, delimiter) {
+    var domClone = elem.cloneNode(true);
+
+    var $printSection = document.getElementById("printSection");
+
+    if (!$printSection) {
+        $printSection = document.createElement("div");
+        $printSection.id = "printSection";
+        document.body.appendChild($printSection);
+    }
+
+    if (append !== true) {
+        $printSection.innerHTML = "";
+    }
+
+    else if (append === true) {
+        if (typeof (delimiter) === "string") {
+            $printSection.innerHTML += delimiter;
+        }
+        else if (typeof (delimiter) === "object") {
+            $printSection.appendChlid(delimiter);
+        }
+    }
+
+    $printSection.appendChild(domClone);
+}​
+*/
 
 $(document).ready(function() {
     $("#cuotas").val("Ahora 12");
@@ -386,6 +439,9 @@ $(document).ready(function() {
         $("#cuotas").val("Ahora 12");
         $("#tna").val(tabla_json[$("#cuotas").val()]["tna"]);
         $("#precio").val("");
+    }),
+    $("#imprimir").on("click", function() {
+        window.print();
     }),
     $("#cuotas").on("change", function() {
         //$("#tna").val(tna_array[$("#cuotas").val()][1]);
